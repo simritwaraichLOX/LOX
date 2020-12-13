@@ -1,80 +1,116 @@
 <template>
-  <div class="container">
-    <h1>Hi {{ username }}</h1>
-
-    <div class="container">
-      <div>
-        <h3 class="center">Documents</h3>
-      </div>
-      <b-container>
-        <b-row align-h="between" class="row">
-          <b-col cols="4">
+  <div class="container col-12">
+    <div class="container col-10">
+      <b-row>
+        <b-col cols="2">
+          <b-pagination
+            v-model="currentPage_docs"
+            :total-rows="rows_docs"
+            aria-controls="doc-table"
+          ></b-pagination>
+        </b-col>
+        <b-col cols="7">
+          <b-row>
+            <div class="text-left">
+              <b-button variant="outline-dark" v-on:click="resetFiles()">
+                Reset
+              </b-button>
+            </div>
+            <div
+              class="filterKeywords"
+              v-for="keyword in displayFilters"
+              :key="keyword.id"
+            >
+              <b-button
+                variant="outline-dark"
+                v-if="keyword.keyword_enabled"
+                v-on:click="searchByKeywords(keyword)"
+              >
+                {{ keyword.keyword_name }}
+              </b-button>
+              <b-button
+                variant="dark"
+                class="filter"
+                v-else
+                v-on:click="resetKeyword(keyword)"
+              >
+                {{ keyword.keyword_name }}
+              </b-button>
+            </div>
+          </b-row>
+        </b-col>
+        <b-col cols="3">
+          <div class="text-right">
             <input
               type="text"
               v-model.trim="filter"
-              placeholder="Filter"
+              placeholder="Quick Search"
               @keyup="filterFiles"
             />
-          </b-col>
-          <!-- <b-col cols="4">
-            <input type="file" ref="file" multiple v-on:change="onSelect()" />
-            <button class="btn-dark" v-on:click="onSubmit()">Submit</button>
-            <div class="message">
-              <h5>{{ message }}</h5>
-            </div>
-          </b-col> -->
-          <b-col cols="4">
-            <input placeholder="Search" v-model="userSearch" />
-            <button
-              size="md"
-              class="btn-dark my-2 my-sm-0"
-              type="submit"
-              @click="onSearch()"
-            >
-              Search
-            </button>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-table
-            class="doc-table"
-            head-variant="dark"
-            :items="displayItems"
-            :fields="fields"
-          >
-          <template v-slot:cell(actions)="{ item }">
-              <!-- `item` -->
-              <b-button variant="dark" v-on:click="download(item)"
-                >Download</b-button
-              >
-              <!-- <b-button variant="danger" v-on:click="test(item.storage_name)"
+            <b-button
+              v-b-modal.modal-upload
+              variant="outline-dark"
+              size="sm"
+              class="icon"
+              ><i id="icon" class="fas fa-cloud-upload-alt"></i
+            ></b-button>
+          </div>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-table
+          class="doc-table"
+          head-variant="dark"
+          hover
+          :per-page="perPage_docs"
+          :current-page="currentPage_docs"
+          :items="displayItems"
+          :fields="fields"
+        >
+          <template class="doc" v-slot:cell(actions)="{ item }">
+            <!-- `item` -->
+            <b-button
+              variant="outline-primary"
+              class="download"
+              v-on:click="downloadItem(item)"
+              ><i class="fas fa-download"></i
+            ></b-button>
+            <!--<b-button variant="danger" v-on:click="deleteItem(item.id)"
                 >Delete</b-button
-              > -->
-            </template>
-          </b-table>
-        </b-row>
-      </b-container>
+              >-->
+          </template>
+        </b-table>
+      </b-row>
     </div>
-    
+    <div>
+      <Upload v-bind:options="options" @clicked="onFormUpload" />
+    </div>
   </div>
-  
 </template>
-
 <script>
 import UserService from "@/services/UserService.js";
+import Upload from "@/components/Modal.upload.vue";
 
 export default {
+  components: {
+    Upload,
+  },
   data() {
     return {
-      id: "",
+      currentPage_docs: 1,
+      perPage_docs: 8,
       username: "",
-      file: "",
-      fileName: "",
       message: "",
       items: [],
       displayItems: [],
+      displayKeywords: [],
+      displayFilters: [],
+      keywords: [],
+      filterByKeywords: [],
       filter: "",
       userSearch: "",
+      roles: "",
+      options: [],
       fields: [
         {
           key: "file_name",
@@ -82,20 +118,14 @@ export default {
         },
         {
           key: "file_size",
-          sortable: true,
+          sortable: false,
         },
         {
           key: "created",
           sortable: true,
-          // Variant applies to the whole column, including the header and footer
-          // variant: "danger",
         },
         {
-          key: "id",
-          sortable: true,
-        },
-        {
-          key: "actions"
+          key: "actions",
         },
       ],
     };
@@ -104,39 +134,73 @@ export default {
     if (!this.$store.getters.isLoggedIn) {
       this.$router.push("/login");
     }
-    this.id = this.$store.getters.getID;
+
     this.username = this.$store.getters.getUser;
     this.roles = this.$store.getters.getUserRoles;
-    console.log(this.roles);
     this.getAllFiles();
+    this.getAllKeywords();
+  },
+  computed: {
+    nameState() {
+      return this.name.length > 2 ? true : false;
+    },
+    rows_docs() {
+      let i = 0;
+      if (typeof this.displayItems !== "undefined") {
+        if (this.displayItems.length > 0) {
+          i = this.displayItems.length;
+        }
+      }
+      return i;
+    },
   },
   methods: {
-    logout() {
-      this.$store.dispatch("logout");
-      this.$router.push("/login");
+    resetFiles() {
+      for (let i = 0; i < this.displayFilters.length; i++) {
+        this.displayFilters[i].keyword_enabled = true;
+      }
+      this.filterByKeywords = [];
+      this.displayItems = this.items;
     },
-    
-    
-    async onSearch() {
-      // let searchBy = {
-      //   id: this.id,
-      //   username: this.username,
-      //   userSearch: this.userSearch,
-      // };
-      console.log(this.items[0].storage_name);
+    resetKeyword(keyword) {
+      let index = this.displayFilters.findIndex(
+        (item) => item.id == keyword.id
+      );
+      this.displayFilters[index].keyword_enabled = true;
 
+      index = this.filterByKeywords.findIndex((item) => item.id == keyword.id);
+      this.filterByKeywords.splice(index, 1);
+    },
+    async searchByKeywords(item) {
+      this.filterByKeywords.push(item);
+      const b = this.displayFilters.findIndex((d) => d.id == item.id);
+
+      this.displayFilters[b].keyword_enabled = false;
+
+      let id = this.$store.getters.getID;
       try {
-        let response = await UserService.getFiles(this.id);
-        console.log(response);
-        console.log(this.items);
-        // this.items = response.data;
+        let response = await UserService.filterByKeywords(
+          id,
+          this.filterByKeywords
+        );
+        this.displayItems = response.data;
       } catch (e) {
         console.log(e);
       }
     },
-    async download(item){
+
+    onFormUpload(value) {
+      if (value) {
+        this.getAllFiles();
+      }
+    },
+    deleteItem(id) {
+      console.log(id);
+    },
+    async downloadItem(item) {
+      let id = this.$store.getters.getID;
       let downloadItem = {
-        id: this.id,
+        id: id,
         file_name: item.file_name,
         storage_name: item.storage_name,
       };
@@ -146,9 +210,44 @@ export default {
         console.log(e);
       }
     },
+    async getAllKeywords() {
+      try {
+        let response = await UserService.getAllKeywords();
+        let lib = [];
+        let options = [];
+        let filters = [];
+        for (let i = 0; i < response.data.length; i++) {
+          let keyword = {
+            keyword_name: response.data[i].keyword_name,
+            description: response.data[i].description,
+            created: response.data[i].created,
+          };
+          let option = {
+            value: response.data[i].id,
+            text: response.data[i].keyword_name,
+          };
+          let filter = {
+            id: response.data[i].id,
+            keyword_enabled: true,
+            keyword_name: response.data[i].keyword_name,
+          };
+          options.push(option);
+          lib.push(keyword);
+          filters.push(filter);
+        }
+        this.displayFilters = filters;
+        this.options = options;
+        this.keywords = lib;
+        this.displayKeywords = lib;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
     async getAllFiles() {
       try {
-        let response = await UserService.getFiles(this.id);
+        let id = this.$store.getters.getID;
+        let response = await UserService.getFiles(id);
         this.items = response.data;
         this.displayItems = response.data;
       } catch (e) {
@@ -156,36 +255,62 @@ export default {
       }
     },
     filterFiles() {
-      if (this.filter) {
-        console.log(this.filter);
-        this.displayItems = this.items.filter((item) =>
-          item.file_name.toLowerCase().includes(this.filter.toLowerCase())
+      if (this.filter != "") {
+        let result = this.displayFiles.filter((item) =>
+          Object.keys(item)
+            .map(
+              (key) =>
+                typeof item[key] === "string" &&
+                item[key]
+                  .toLocaleLowerCase()
+                  .includes(this.filter.toLocaleLowerCase())
+            )
+            .includes(true)
         );
+        this.displayFiles = result;
       } else {
-        this.displayItems = this.items;
+        this.displayFiles = this.files;
       }
     },
-    test(test){
-      console.log(test);
-    }
+    async onSearch() {
+      try {
+        let id = this.$store.getters.getID;
+        let response = await UserService.getFiles(id);
+        if (response) {
+          // Update
+        }
+        // this.items = response.data;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    onRowSelected(item, index) {
+      // Direct to Document Details Page
+      console.log(item);
+      console.log(index);
+    },
   },
 };
 </script>
 <style scoped>
-.doc-table {
-  margin-top: 2%;
-}
-
-.row {
-  margin-top: 2%;
-}
-.search{
-  text-align: center;
-}
 .container {
   margin-top: 2%;
 }
 .h3 {
   margin-bottom: 2%;
+}
+
+.download {
+  border-radius: 12px;
+}
+
+#icon {
+  font-size: 1.5rem;
+}
+.icon {
+  margin: 3px;
+}
+.filterKeywords {
+  margin-left: 2px;
 }
 </style>

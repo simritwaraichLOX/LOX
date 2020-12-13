@@ -1,5 +1,3 @@
-// src/views/SignUp.vue
-
 <template>
   <div class="col-12">
     <div class="card card-container">
@@ -101,7 +99,6 @@ export default {
           password_repeat: this.password_repeat,
         };
         let response = await AuthService.signUp(credentials);
-        console.log(response);
         this.msg = response.msg;
       } catch (error) {
         this.msg = error.response.data.msg;

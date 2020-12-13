@@ -47,19 +47,18 @@ export default {
           password: this.password,
         };
         const response = await AuthService.login(credentials);
-        console.log(response);
         this.msg = response.msg;
         const token = response.accessToken;
         const user = response.username;
         const id = response.id;
+
         const roles = response.roles;
-        
         this.$store
           .dispatch("login", { token, user, id, roles })
           .then()
           .catch((err) => console.log(err));
-          // () => this.$router.push("/")
-          // this.$router.push("/");
+        () => this.$router.push("/");
+        this.$router.push("/");
       } catch (error) {
         this.msg = error.response.data.msg;
       }

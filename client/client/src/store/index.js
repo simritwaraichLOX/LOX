@@ -28,9 +28,9 @@ export default new Vuex.Store({
     getID: (state) => {
       return state.id;
     },
-    getUserRoles: (state)=>{
+    getUserRoles: (state) => {
       return state.roles;
-    }
+    },
   },
   mutations: {
     SET_TOKEN: (state, token) => {
@@ -42,7 +42,7 @@ export default new Vuex.Store({
     SET_ID: (state, id) => {
       state.id = id;
     },
-    SET_ROLES:(state, roles) =>{
+    SET_ROLES: (state, roles) => {
       state.roles = roles;
     },
     RESET: (state) => {

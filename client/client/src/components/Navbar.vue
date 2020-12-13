@@ -2,13 +2,13 @@
   <div>
     <div>
       <b-navbar toggleable="lg" type="dark" variant="dark">
-        <b-navbar-brand href="#">HandyNotes</b-navbar-brand>
+        <b-navbar-brand href="#">LOX</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
-            <b-nav-item href="/">Home</b-nav-item>
+            <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item
               v-for="routes in links_isLoggedIn"
               :key="routes.id"
@@ -22,7 +22,6 @@
               Admin
             </b-nav-item>
           </b-navbar-nav>
-          
 
           <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto">
@@ -65,11 +64,6 @@ export default {
     return {
       links_noLoggedIn: [
         {
-          id: "signup",
-          name: "SIGN UP",
-          path: "/signup",
-        },
-        {
           id: "login",
           name: "LOG IN",
           path: "/login",
@@ -78,7 +72,7 @@ export default {
       links_isLoggedIn: [
         {
           id: "documents",
-          name: "DOCUMENTS",
+          name: "Documents",
           path: "/documents",
         },
       ],
@@ -87,14 +81,12 @@ export default {
   },
   computed: {
     isLoggedIn: function() {
-      console.log("isLoggedIn Called");
       return this.$store.state.user;
     },
     isAdmin: function() {
       let i = this.$store.state.roles.includes("ROLE_ADMIN");
       return i;
     },
-
   },
   methods: {
     logout() {
