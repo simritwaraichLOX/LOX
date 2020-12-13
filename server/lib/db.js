@@ -10,7 +10,7 @@ module.exports = function getPool() {
     }
     const config = {
       host: 'localhost', // process.env.HOST
-      port: 3306,
+      port: 3308,
       user: 'root',
       password: '',//Put Instance ID for AWS HERE,
       database: 'lox',
