@@ -9,7 +9,7 @@ const fs = require("fs");
 const start_clean = false;
 
 const corsOptions = {
-  origin: 'http://ec2-3-96-168-166.ca-central-1.compute.amazonaws.com',
+  origin: 'http://localhost:8081',
 };
 
 // const corsOptions = {
