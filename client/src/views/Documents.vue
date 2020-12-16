@@ -256,7 +256,7 @@ export default {
     },
     filterFiles() {
       if (this.filter != "") {
-        let result = this.displayFiles.filter((item) =>
+        let result = this.displayItems.filter((item) =>
           Object.keys(item)
             .map(
               (key) =>
@@ -267,9 +267,9 @@ export default {
             )
             .includes(true)
         );
-        this.displayFiles = result;
+        this.displayItems = result;
       } else {
-        this.displayFiles = this.files;
+        this.displayItems = this.files;
       }
     },
     async onSearch() {

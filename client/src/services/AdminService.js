@@ -12,7 +12,7 @@ export default {
   },
   getAllFiles() {
     return axios
-      .get(url + "files/")
+      .post(url + "files/")
       .then((response) => response.data)
       .catch((err) => {
         console.log(err);

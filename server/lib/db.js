@@ -4,16 +4,15 @@ var pool;
 
 module.exports = function getPool() {
   try {
-
     if (pool) {
       return pool;
     }
     const config = {
-      host: 'localhost', // process.env.HOST
+      host: "localhost", // process.env.HOST
       port: 3308,
-      user: 'root',
-      password: '',//Put Instance ID for AWS HERE,
-      database: 'lox',
+      user: "root",
+      password: "", //Put Instance ID for AWS HERE,
+      database: "vue_lox",
       //connectionLimit: 10,
       //waitForConnections: true,
       //queueLimit: 0,

@@ -474,7 +474,7 @@ export default {
     },
     async getAllFiles() {
       try {
-        let response = await UserService.getFiles(this.id);
+        let response = await AdminService.getAllFiles();
         this.files = response.data;
         this.displayFiles = response.data;
       } catch (e) {

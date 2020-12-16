@@ -205,29 +205,23 @@ async function getUserRole(userID) {
 // Get Specific File
 
 exports.getFile = async (req, res, next) => {
+  //   db()
+  //     .query(`SELECT file_id FROM user_files WHERE user_id = (?)`, [
+  //       req.params.id,
+  //     ])
+  //     .then((result) => {
+  //       let library = [];
+  //       for (let i = 0; i < result[0].length; i++) {
+  //         library.push(result[0][i].file_id);
+  //       }
+  console.log();
   db()
-    .query(`SELECT file_id FROM user_files WHERE user_id = (?)`, [
-      req.params.id,
-    ])
+    .query(`SELECT * FROM files`)
     .then((result) => {
-      let library = [];
-      for (let i = 0; i < result[0].length; i++) {
-        library.push(result[0][i].file_id);
-      }
-      db()
-        .query(`SELECT * FROM files WHERE id IN (?)`, [library])
-        .then((result) => {
-          res.status(201).send({
-            msg: "Get Files Success!",
-            data: result[0],
-          });
-        })
-        .catch((err) => {
-          return res.status(200).send({
-            msg: "Empty",
-            err: err,
-          });
-        });
+      res.status(201).send({
+        msg: "Get Files Success!",
+        data: result[0],
+      });
     })
     .catch((err) => {
       return res.status(200).send({
@@ -236,6 +230,14 @@ exports.getFile = async (req, res, next) => {
       });
     });
 };
+//     })
+//     .catch((err) => {
+//       return res.status(200).send({
+//         msg: "Empty",
+//         err: err,
+//       });
+//     });
+// };
 
 /**
  **************************************************************
@@ -298,41 +300,3 @@ exports.getKeywords = async (req, res, next) => {
       });
     });
 };
-
-// get All Files related to keyword
-// exports.getFileByKeywords = async (req, res, next) => {
-//   keyword_ids = [];
-//   for (let i = 0; i < req.body.length; i++) {
-//     keyword_ids.push(req.body[i].id);
-//   }
-
-//   db()
-//     .query(`SELECT * FROM files_keywords WHERE keyword_id IN (?)`, [
-//       keyword_ids,
-//     ])
-//     .then(([result, fields]) => {
-//       let library = [];
-//       file_ids = [];
-
-//       for (let i = 0; i < result.length; i++) {
-//         file_ids.push(result[i].file_id);
-//       }
-//       db()
-//         .query(`SELECT * FROM user_files WHERE file_id IN (?)`, [file_ids])
-//         .then(([result, fields]) => {
-//           file_ids = [];
-//           console.log(result);
-//           for (let i = 0; i < result.length; i++) {
-//             if (req.params.id == result[i].user_id) {
-//               file_ids.push(result[i]);
-//             }
-//           }
-//           console.log(file_ids);
-//         });
-
-//       // We have all the Keyword IDs
-//       // We have all File IDs
-//       // Query user_files in file_ids
-//       // If user_id == req.params.id push to array and send
-//     });
-// };
