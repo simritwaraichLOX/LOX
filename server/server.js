@@ -28,43 +28,53 @@ app.use(express.static("/public"));
 
 (async () => {
   if (!start_clean) return;
-
-  bcrypt.hash("Testing123!", 10, (err, hash) => {
-    // Hash Password
-    if (err) {
-      console.log(err);
-    } else {
-      var uid = uuid.v4(); // Unique ID
-      db()
-        .query(
-          `INSERT INTO users (unique_id, first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
-          [uid, "The", "Admin", "the.admin", "the.admin@gmail.com", hash]
-        )
-        .then((result) => {
-          return {
-            data: result[0],
-          };
-        })
-        .then((result) => {
-          if (!fs.existsSync("./uploads/" + result.data.insertId)) {
-            console.log("No Existing Directory. Creating Directory.");
-            fs.mkdirSync("./uploads/" + result.data.insertId);
-          }
-
-          db()
-            .query(`INSERT INTO user_roles (user_id, role_id) VALUES (?,?)`, [
-              result.data.insertId,
-              1,
-            ])
-            .catch((err) => {
-              console.log(err);
-            });
-        })
-        .catch((err) => {
-          console.log(err);
+  db()
+    .query("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", [
+      req.body.username,
+    ])
+    .then(([users, fields]) => {
+      if (users.length) {
+        return res.status(500).send({
+          msg: "This username is already in use!",
         });
-    }
-  });
+      } else {
+        bcrypt.hash("Testing123!", 10, (err, hash) => {
+          // Hash Password
+          if (err) {
+            console.log(err);
+          } else {
+            var uid = uuid.v4(); // Unique ID
+            db()
+              .query(
+                `INSERT INTO users (unique_id, first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
+                [uid, "The", "Admin", "the.admin", "the.admin@gmail.com", hash]
+              )
+              .then((result) => {
+                return {
+                  data: result[0],
+                };
+              })
+              .then((result) => {
+                if (!fs.existsSync("./uploads/" + result.data.insertId)) {
+                  console.log("No Existing Directory. Creating Directory.");
+                  fs.mkdirSync("./uploads/" + result.data.insertId);
+                }
+
+                db()
+                  .query(`INSERT INTO user_roles (user_id, role_id) VALUES (?,?)`, [
+                    result.data.insertId,
+                    1,
+                  ])
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        });
+  }});
 }).call();
 
 

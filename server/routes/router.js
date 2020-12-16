@@ -11,7 +11,7 @@ module.exports = (app) => {
       "Access-Control-Allow-Headers",
       "x-access-token, Origin, Content-Type, Accept"
     );
-    res.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+    
     next();
   });
 
@@ -27,6 +27,12 @@ module.exports = (app) => {
     "/api/admin/users",
     [authJWT.isLoggedIn, authJWT.isAdmin],
     adminController.getAllUsers
+  );
+
+  app.post(
+    "/api/admin/files",
+    [authJWT.isLoggedIn, authJWT.isAdmin],
+    adminController.getFile
   );
 
   app.post(

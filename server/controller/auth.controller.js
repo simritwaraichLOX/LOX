@@ -58,15 +58,20 @@ exports.signup = async (req, res, next) => {
                       };
                     })
                     .then((result) => {
-                      console.log('adding roles');
+                      if (!fs.existsSync("./uploads/" + result.data.insertId)) {
+                        console.log(
+                          "No Existing Directory. Creating Directory."
+                        );
+                        fs.mkdirSync("./uploads/" + result.data.insertId);
+                      }
+
                       db()
                         .query(
                           `INSERT INTO user_roles (user_id, role_id) VALUES (?,?)`,
                           [result.data.insertId, 2]
                         )
                         .then((result) => {
-			console.log('rolesAdded');
-                          return res.status(201).send({
+                          res.status(201).send({
                             msg: "Registered!",
                             data: result[0],
                           });
@@ -76,13 +81,6 @@ exports.signup = async (req, res, next) => {
                             msg: err,
                           });
                         });
-			if (!fs.existsSync("./uploads/" + result.data.insertId)) {
-                        console.log(
-                          "No Existing Directory. Creating Directory."
-                        );
-                        fs.mkdirSync("./uploads/" + result.data.insertId);
-                      }
-		      
                     })
                     .catch((err) => {
                       return res.status(500).send({
