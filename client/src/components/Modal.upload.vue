@@ -10,17 +10,17 @@
       @ok="handleOk"
     >
       <form ref="form" @submit.stop.prevent="handleSubmit">
-        <b-form-group
+        <!--      <b-form-group
           label="File Name"
           label-for="file_name-input"
           invalid-feedback="Document Name is required"
         >
-          <b-form-input
+               <b-form-input
             id="file_name-input"
             v-model="$v.form.file_name.$model"
             :state="validState('file_name')"
-          ></b-form-input>
-        </b-form-group>
+          ></b-form-input> 
+        </b-form-group>-->
         <b-form-group>
           <b-form-file
             v-model="$v.form.file.$model"
@@ -51,7 +51,7 @@
 
 <script>
 import UserService from "@/services/UserService.js";
-import { required, minLength } from "vuelidate/lib/validators";
+import { required } from "vuelidate/lib/validators";
 export default {
   name: "modal-upload",
   props: {
@@ -62,7 +62,6 @@ export default {
       file: null,
       keywords: [],
       form: {
-        file_name: null,
         file: null,
         keywords: [],
       },
@@ -70,10 +69,6 @@ export default {
   },
   validations: {
     form: {
-      file_name: {
-        required,
-        minLength: minLength(4),
-      },
       file: {
         required,
       },
@@ -113,6 +108,10 @@ export default {
       try {
         let response = await UserService.upload(formData);
         if (response) {
+          this.$v.form.$reset();
+          this.$v.form.keywords.$reset();
+          this.$v.form.file.$reset();
+
           this.$emit("clicked", true);
           this.$nextTick(() => {
             this.$bvModal.hide("modal-upload");

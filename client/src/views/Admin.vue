@@ -39,6 +39,13 @@
                 :items="displayUsers"
                 :fields="user_fields"
               >
+                <template v-slot:cell(registered)="{ item }">
+                  <span>{{ formatDate(item.registered) }}</span>
+                </template>
+                <template v-slot:cell(last_login)="{ item }">
+                  <span>{{ formatDate(item.last_login) }}</span>
+                </template>
+
                 <template v-slot:cell(actions)="{ item }">
                   <!-- `item` -->
                   <b-button variant="primary" v-on:click="onEditItem(item)"
@@ -120,6 +127,12 @@
                 :items="displayFiles"
                 :fields="doc_fields"
               >
+                <template v-slot:cell(file_size)="{ item }">
+                  <span> {{ formatKB(item.file_size) }}</span>
+                </template>
+                <template v-slot:cell(created)="{ item }">
+                  <span>{{ formatDate(item.created) }}</span>
+                </template>
                 <template v-slot:cell(actions)="{ item }">
                   <!-- `item` -->
                   <b-button
@@ -173,6 +186,9 @@
                 :items="displayKeywords"
                 :fields="keyword_fields"
               >
+                <template v-slot:cell(created)="{ item }">
+                  <span>{{ formatDate(item.created) }}</span>
+                </template>
               </b-table>
             </b-row>
           </b-container>
@@ -192,6 +208,7 @@ import ModalUpload from "@/components/Modal.upload.vue";
 import ModalUser from "@/components/Modal.user.vue";
 import ModalKeyword from "@/components/Modal.keyword.vue";
 import ModalEditUser from "@/components/Modal.edituser.vue";
+import moment from "moment";
 
 export default {
   components: {
@@ -340,6 +357,14 @@ export default {
     },
   },
   methods: {
+    formatKB(value) {
+      let kb = parseInt(value) / 1000;
+
+      return kb + " kb";
+    },
+    formatDate(value) {
+      return moment(value).format("MMM DD YYYY");
+    },
     async downloadItem(item) {
       let id = this.$store.getters.getID;
       let downloadItem = {

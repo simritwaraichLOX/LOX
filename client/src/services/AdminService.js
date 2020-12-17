@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = `http://localhost:8080/api/admin/`;
+const url = `http://ec2-3-96-168-166.ca-central-1.compute.amazonaws.com:8080/api/admin/`;
 export default {
   getAllUsers() {
     return axios

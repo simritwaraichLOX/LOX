@@ -85,6 +85,8 @@ export default {
       this.handleSubmit();
     },
     async handleSubmit() {
+      console.log("reset me please");
+
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         console.log("Error");
@@ -100,6 +102,9 @@ export default {
       try {
         let response = await AdminService.createKeyword(credentials);
         if (response) {
+          this.form.keyword = "";
+          this.form.description = "";
+          this.$v.form.$reset();
           this.$emit("clicked", true);
           this.$nextTick(() => {
             this.$bvModal.hide("modal-keyword");
@@ -108,7 +113,6 @@ export default {
       } catch (e) {
         console.log(e);
       }
-
       this.$nextTick(() => {
         this.$bvModal.hide("modal-keyword");
       });

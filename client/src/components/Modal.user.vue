@@ -180,6 +180,21 @@ export default {
         };
         let response = await AuthService.signUp(credentials);
         if (response) {
+          this.$v.form.$reset();
+          this.$v.form.username.$reset();
+          this.$v.form.email.$reset();
+          this.$v.form.first_name.$reset();
+          this.$v.form.last_name.$reset();
+          this.$v.form.password.$reset();
+          this.$v.form.confirm_password.$reset();
+
+          this.form.username = "";
+          this.form.email = "";
+          this.form.first_name = "";
+          this.form.last_name = "";
+          this.form.password = "";
+          this.form.confirm_password = "";
+
           this.$emit("clicked", true);
           this.$nextTick(() => {
             this.$bvModal.hide("modal-user");

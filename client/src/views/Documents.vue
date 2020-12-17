@@ -67,6 +67,13 @@
           :items="displayItems"
           :fields="fields"
         >
+          <template v-slot:cell(file_size)="{ item }">
+            <span> {{ formatKB(item.file_size) }}</span>
+          </template>
+          <template class="doc" v-slot:cell(created)="{ item }">
+            <span>{{ formatDate(item.created) }}</span>
+          </template>
+
           <template class="doc" v-slot:cell(actions)="{ item }">
             <!-- `item` -->
             <b-button
@@ -90,6 +97,7 @@
 <script>
 import UserService from "@/services/UserService.js";
 import Upload from "@/components/Modal.upload.vue";
+import moment from "moment";
 
 export default {
   components: {
@@ -155,6 +163,14 @@ export default {
     },
   },
   methods: {
+    formatKB(value) {
+      let kb = parseInt(value) / 1000;
+
+      return kb + " kb";
+    },
+    formatDate(value) {
+      return moment(value).format("MMM DD YYYY");
+    },
     resetFiles() {
       for (let i = 0; i < this.displayFilters.length; i++) {
         this.displayFilters[i].keyword_enabled = true;
